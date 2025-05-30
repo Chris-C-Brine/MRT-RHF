@@ -1,0 +1,64 @@
+{
+  "name": "@chris-c-brine/mrt-rhf",
+  "version": "0.0.1",
+  "description": "Material React Table with React Hook Form",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "React Hook Form",
+    "Material React Table",
+    "typescript"
+  ],
+  "peerDependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-hook-form": "^7.56.2",
+    "react-hook-form-mui": "^7.6.0",
+    "material-react-table": "^3.2.1",
+    "@mui/material": "^7.1.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^7.1.0"
+  },
+  "devDependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+
+    "material-react-table": "^3.2.1",
+    "@mui/material": "^7.1.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^7.1.0",
+
+    "react-hook-form": "^7.56.3",
+    "react-hook-form-mui": "^7.6.0",
+
+    "typescript": "^5.8.3",
+    "@types/react": "^19.1.4",
+    "@types/react-dom": "^19.1.5",
+    "@types/node": "^22.15.17",
+
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.2",
+
+    "rollup": "^4.40.2",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "tslib": "^2.8.1"
+  },
+  "author": "Christopher Brine",
+  "license": "AAL",
+  "bugs": {
+    "url": "https://github.com/Chris-C-Brine/MRT-RHF/issues"
+  },
+  "homepage": "https://github.com/Chris-C-Brine/MRT-RHF#readme"
+}
