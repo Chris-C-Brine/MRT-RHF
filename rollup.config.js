@@ -34,6 +34,9 @@ export default {
         'react-dom',
         '@mui/material',
         '@emotion/react',
-        '@emotion/styled'
+        '@emotion/styled',
+        'material-react-table',
+        'react-hook-form',
+        'react-hook-form-mui',
     ]
 };

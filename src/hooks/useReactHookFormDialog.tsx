@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
-import type { MRT_RowData, MRT_TableOptions } from 'material-react-table';
+import type {MRT_RowData, MRT_TableInstance, MRT_TableOptions} from 'material-react-table';
 import { PaperForm, type PaperFormProps } from '../components/PaperForm';
-import type { PaperProps } from '@mui/material';
+import type { PaperProps} from '@mui/material';
 import { injectDialogComponent } from '../utils/injectDialogComponent';
 import {DefaultValues, useForm} from 'react-hook-form';
 
@@ -14,28 +14,35 @@ export function useReactHookFormDialog<T extends MRT_RowData>(
   const editingRow = props.state?.editingRow;
 
   const formContext = useForm<T>({
-    defaultValues: editingRow?._valuesCache as DefaultValues<T>,
-    // mode: 'onChange',
+    defaultValues: editingRow?._valuesCache as DefaultValues<T>
   });
-
-
 
   const formProps = useMemo<PaperFormProps<T>['formProps']>(() => ({
     form: formContext,
-    onSuccess: async (values) => {
-      // API call here with updated values
-      
-    },
+    onSuccess: async (values) => {}, // Form validation only
   }), [formContext]);
 
-  const PaperFormComponent = useCallback(
-    (paperProps: PaperProps) => (
-      <PaperForm formProps={formProps} {...paperProps} />
+  // Create a component that will be used as the Paper component in the dialog
+  const getPaperFormComponent = useCallback(
+    (table?: MRT_TableInstance<T>) =>
+    (props: PaperProps) => (
+      <PaperForm
+        key={`form-${editingRow?.id || 'new'}`} // Force re-render when row changes
+        formProps={formProps}
+        table={table}
+        {...props}
+      />
     ),
-    [formProps]
+    [formProps, editingRow?.id] // Re-create when formProps or editingRow.id changes
   );
 
-  useEffect(() => console.log(formContext.getValues()), [formContext]);
+  // Debug logging - only log when values actually change
+  useEffect(() => {
+    const subscription = formContext.watch((value) => {
+      console.log('Form values:', value);
+    });
+    return () => subscription.unsubscribe();
+  }, [formContext]);
 
   return {
     enableEditing: true,
@@ -47,16 +54,15 @@ export function useReactHookFormDialog<T extends MRT_RowData>(
         props?.onEditingRowSave?.(args);
       }
     },
-    onEditingRowChange: (current) => {
-      console.log({"current editing row": current});
-      if (current != null) {
-        formContext.reset(!current ? current : undefined);
-      }
-      return current;
-    },
     onEditingRowCancel: () => {
       formContext.reset();
     },
-    muiEditRowDialogProps: injectDialogComponent(props?.muiEditRowDialogProps, PaperFormComponent),
+    muiEditRowDialogProps: (args) => {
+      if (typeof args === 'object') {
+        const Component = getPaperFormComponent(args.table);
+        return injectDialogComponent(props?.muiEditRowDialogProps, Component);
+      }
+      return injectDialogComponent(props?.muiEditRowDialogProps, PaperForm);
+    },
   };
 }

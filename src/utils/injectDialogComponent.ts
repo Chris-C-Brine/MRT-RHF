@@ -14,21 +14,23 @@ export type DialogPropsOrFn<T extends MRT_RowData> =
 export function injectDialogComponent<T extends MRT_RowData>(
   original: DialogPropsOrFn<T> | undefined,
   component: ElementType
-): DialogPropsOrFn<T> {
+): DialogProps {
   if (typeof original === 'function' || original === undefined) {
-    return (args: { row: MRT_Row<T>; table: MRT_TableInstance<T> }) => {
-      const base = original?.(args) ?? {open: true, slotProps: { paper: { component }}};
-      return {
-        ...base,
-        slotProps: {
-          ...base?.slotProps,
-          paper: {
-            ...base?.slotProps?.paper ?? {},
-            component,
-          },
-        },
-      };
-    };
+   // return (args: { row: MRT_Row<T>; table: MRT_TableInstance<T> }) => {
+   //    const base = original?.(args) ?? {open: true, slotProps: { paper: { component }}};
+   //    return {
+   //      ...base,
+   //      open: true, // test
+   //      slotProps: {
+   //        ...base?.slotProps,
+   //        paper: {
+   //          ...base?.slotProps?.paper ?? {},
+   //          component,
+   //        },
+   //      },
+   //    };
+   //  };
+    return {open: true, slotProps: { paper: { component }}};
   }
 
   return {

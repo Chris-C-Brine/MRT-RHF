@@ -1,12 +1,16 @@
 // src/components/PaperForm.tsx
-import { Paper, type PaperProps } from "@mui/material";
-import { FormContainer, type FieldValues, type FormContainerProps } from "react-hook-form-mui";
+import {Paper, type PaperProps} from "@mui/material";
+import {FormContainer, type FieldValues, type FormContainerProps} from "react-hook-form-mui";
+import {useEffect} from "react";
+import {useFormContext} from "react-hook-form";
+import {MRT_RowData, MRT_TableInstance} from "material-react-table";
 
 /**
  * Props for the PaperForm component
  */
 export type PaperFormProps<T extends FieldValues> = PaperProps & {
   formProps: FormContainerProps<T>;
+  table?: MRT_TableInstance<T>;
 };
 
 /**
@@ -36,12 +40,30 @@ export type PaperFormProps<T extends FieldValues> = PaperProps & {
  *
  * @template T - The type of form values being handled
  */
-export const PaperForm = <T extends FieldValues>({ children, formProps, ...paperProps }: PaperFormProps<T>) => (
+export const PaperForm = <T extends FieldValues>({children, table, formProps, ...paperProps}: PaperFormProps<T>) => (
   <Paper {...paperProps}>
     <FormContainer {...formProps}>
-      {children}
+      <FormSync table={table}/>
+        {children}
     </FormContainer>
   </Paper>
 );
 
+export type FormSyncProps<T extends MRT_RowData> = {
+  table?: MRT_TableInstance<T>;
+}
+const FormSync = <T extends MRT_RowData>({table}: FormSyncProps<T>) => {
+  useEffect(() => {
+    console.log(table?.getState());
+  }, [table]);
+
+  const editingRow = table?.getState()?.editingRow;
+  const context = useFormContext();
+  useEffect(() => {
+    if (editingRow) {
+      context.reset(editingRow.original);
+    }
+  }, [context, editingRow]);
+  return <></>
+}
 
