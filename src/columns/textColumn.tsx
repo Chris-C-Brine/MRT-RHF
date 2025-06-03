@@ -2,7 +2,6 @@
 import {MRT_ColumnDef, MRT_RowData} from 'material-react-table';
 import {TextFieldElement} from 'react-hook-form-mui';
 import {updateEditingRow} from "../utils/updateEditingRow";
-import {ChangeEvent} from "react";
 import {TextFieldProps} from "@mui/material";
 import {getTextFieldProps} from "../utils/getTextFieldProps";
 
@@ -12,29 +11,21 @@ export interface TextColumnProps<T extends MRT_RowData> extends Omit<MRT_ColumnD
 export function textColumn<T extends MRT_RowData>(rest: TextColumnProps<T>): MRT_ColumnDef<T> {
   return {
     ...rest,
-    Edit: ({cell, row, column, table}) => {
-
-      const {getState, options: {createDisplayMode, editDisplayMode}} = table
-      const {columnDef} = column;
-      const {creatingRow} = getState();
-      const isCreating = creatingRow?.id === row.id;
-
-      const handleOnChange = (_e: ChangeEvent, newValue: string) => {
-        updateEditingRow(table, cell, newValue);
-      };
-
+    Edit: ({cell, column, table}) => {
+     const {columnDef} = column;
+     // Transfer the text field props without overwriting the core component
       const {component, ...textFieldProps}: TextFieldProps = getTextFieldProps({cell, table});
+
+      // Update material-react-table's editing value focus is lost
+      const handleOnBlur: TextFieldProps['onBlur'] = (e) => {
+        updateEditingRow(table, cell, e.target.value);
+      }
 
       return <TextFieldElement
         name={column.id}
+        label={columnDef.header}
         {...textFieldProps}
-        label={
-          ['custom', 'modal'].includes(
-            (isCreating ? createDisplayMode : editDisplayMode) as string
-          )
-            ? columnDef.header
-            : undefined
-        }
+        onBlur={handleOnBlur}
       />;
     },
   };

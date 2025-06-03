@@ -26,7 +26,6 @@ export const updateEditingRow = <TData extends MRT_RowData>(
 
   //@ts-expect-error row._valuesCache is keyed by column.id
   row._valuesCache[cell.column.id] = newValue;
-  console.log(row._valuesCache);
 
   if (editingRow?.id) {
     table.setEditingRow(row);

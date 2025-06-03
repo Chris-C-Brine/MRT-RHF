@@ -1,16 +1,16 @@
 // src/components/PaperForm.tsx
 import {Paper, type PaperProps} from "@mui/material";
 import {FormContainer, type FieldValues, type FormContainerProps} from "react-hook-form-mui";
-import {useEffect} from "react";
+import {useEffect, useRef, type PropsWithChildren} from "react";
 import {useFormContext} from "react-hook-form";
-import {MRT_RowData, MRT_TableInstance} from "material-react-table";
+import type {MRT_Row, MRT_RowData} from "material-react-table";
 
 /**
  * Props for the PaperForm component
  */
 export type PaperFormProps<T extends FieldValues> = PaperProps & {
   formProps: FormContainerProps<T>;
-  table?: MRT_TableInstance<T>;
+  editingRow?: MRT_Row<T> | null | undefined;
 };
 
 /**
@@ -40,30 +40,31 @@ export type PaperFormProps<T extends FieldValues> = PaperProps & {
  *
  * @template T - The type of form values being handled
  */
-export const PaperForm = <T extends FieldValues>({children, table, formProps, ...paperProps}: PaperFormProps<T>) => (
-  <Paper {...paperProps}>
-    <FormContainer {...formProps}>
-      <FormSync table={table}/>
-        {children}
-    </FormContainer>
-  </Paper>
+export const PaperForm = <T extends FieldValues>({children, editingRow, formProps, ...paperProps}: PaperFormProps<T>) => (
+  <FormContainer {...formProps}>
+    <FormSync editingRow={editingRow} paperProps={paperProps}>
+      {children}
+    </FormSync>
+  </FormContainer>
 );
 
-export type FormSyncProps<T extends MRT_RowData> = {
-  table?: MRT_TableInstance<T>;
+export interface FormSyncProps<T extends MRT_RowData> extends PropsWithChildren, Pick<PaperFormProps<T>, 'editingRow'> {
+  paperProps: Omit<PaperProps, 'children'>;
 }
-const FormSync = <T extends MRT_RowData>({table}: FormSyncProps<T>) => {
-  useEffect(() => {
-    console.log(table?.getState());
-  }, [table]);
-
-  const editingRow = table?.getState()?.editingRow;
+const FormSync = <T extends MRT_RowData>({editingRow, paperProps, children}: FormSyncProps<T>) => {
   const context = useFormContext();
-  useEffect(() => {
-    if (editingRow) {
-      context.reset(editingRow.original);
-    }
-  }, [context, editingRow]);
-  return <></>
-}
+  const prevEditingRowId = useRef<string | undefined>(undefined);
 
+  // Only reset form when editingRow.id changes (new row selected)
+  useEffect(() => {
+    if (editingRow && editingRow.id !== prevEditingRowId.current) {
+      prevEditingRowId.current = editingRow.id;
+      // Use setTimeout to break the render cycle
+      setTimeout(() => {
+        context.reset(editingRow.original);
+      }, 0);
+    }
+  }, [editingRow]);
+
+  return <Paper {...paperProps}>{children}</Paper>;
+}
