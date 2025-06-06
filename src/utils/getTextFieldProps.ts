@@ -12,7 +12,6 @@ interface GetMRT_TextFieldProps<T extends MRT_RowData> {
   table: MRT_TableInstance<T>;
 }
 
-
 /**
  * Gets consistent TextField props for editing components
  *
