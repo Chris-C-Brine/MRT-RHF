@@ -1,7 +1,7 @@
 import {MRT_RowData, MRT_TableInstance, MRT_TableOptions, useMaterialReactTable} from "material-react-table";
 import {useFormContext} from "react-hook-form-mui";
 import {useFormTableContext} from "../state/FormTableProvider";
-import {useMemo} from "react";
+import {useCallback, useMemo} from "react";
 
 /**
  * Hook that integrates Material React Table with React Hook Form.
@@ -23,8 +23,15 @@ export const useRHFMaterialReactTable = <T extends MRT_RowData>(tableOptions: MR
   const memoizedOptions = useMemo<MRT_TableOptions<T>>(() => ({
     ...tableOptions,
     // Validation Enforcement: Editing
-    onEditingRowSave: async (props) => {
-      if (await trigger()) tableOptions.onEditingRowSave?.(props);
+    onEditingRowSave: async ({exitEditingMode, ...props}) => {
+      const exit = useCallback(() => {
+        editingRow.current = null;
+        exitEditingMode();
+      }, [exitEditingMode]);
+
+      if (await trigger()) {
+        tableOptions.onEditingRowSave?.({...props, exitEditingMode: exit});
+      }
     },
     // Validation Enforcement: Creating
     onCreatingRowSave: async (props) => {

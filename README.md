@@ -11,7 +11,7 @@
 This package requires the following peer dependencies:
 
 ```shell script
-  npm i react react-dom material-react-table @mui/material @mui/x-date-pickers @mui/icons-material @emotion/react @emotion/styled react-hook-form
+  npm i react react-dom material-react-table @mui/material @mui/x-date-pickers @mui/icons-material @emotion/react @emotion/styled react-hook-form react-hook-form-mui
 ```
 
 ## Project Purpose
@@ -58,7 +58,8 @@ const InnerDemoTable = memo(() => {
               <VisibilityIcon />
             </IconButton>
             <IconButton
-              loading={editingRow?.current?.id == row.id}
+              disabled={editingRow?.current?.id} 
+              loading={editingRow?.current?.id == row.id}  
               onClick={() => setEditingRow({ table, row })}
             >
               <EditIcon />

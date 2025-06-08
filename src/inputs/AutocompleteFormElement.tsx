@@ -23,7 +23,7 @@ export type AutocompleteFormElementProps<
   FreeSolo extends boolean | undefined = false,
   ChipComponent extends ElementType = ChipTypeMap['defaultComponent']
 > =
-  Omit<AutocompleteElementProps<TFieldValues, TName, TValue, Multiple, DisableClearable, FreeSolo, ChipComponent>, 'name' | 'control' | 'textFieldProps'>
+  Omit<AutocompleteElementProps<TName, Multiple, DisableClearable, FreeSolo, ChipComponent>, 'name' | 'control' | 'textFieldProps'>
   & EditFunctionProps<TData>;
 
 export const AutocompleteFormElement = memo(<T extends MRT_RowData>(
