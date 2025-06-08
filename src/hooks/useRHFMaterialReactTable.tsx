@@ -1,27 +1,40 @@
 import {MRT_RowData, MRT_TableInstance, MRT_TableOptions, useMaterialReactTable} from "material-react-table";
 import {useFormContext} from "react-hook-form-mui";
 import {useFormTableContext} from "../state/FormTableProvider";
+import {useMemo} from "react";
 
+/**
+ * Hook that integrates Material React Table with React Hook Form.
+ * @template T - The row data type that extends MRT_RowData
+ * @param tableOptions - The options for the Material React Table
+ * @returns A table instance with form integration
+ *
+ * @example
+ * const tableConfig = useMemo<MRT_TableOptions<T>>(() => ({
+ *   // table configuration
+ * }), [dependencies]);
+ *
+ * const table = useRHFMaterialReactTable(tableConfig);
+ */
 export const useRHFMaterialReactTable = <T extends MRT_RowData>(tableOptions: MRT_TableOptions<T>): MRT_TableInstance<T> => {
+  const {trigger} = useFormContext<T>();
+  const {editingRow} = useFormTableContext<T>();
 
-  const {trigger, reset} =  useFormContext();
-  const {setEditingRow} = useFormTableContext<T>();
+  const memoizedOptions = useMemo<MRT_TableOptions<T>>(() => ({
+    ...tableOptions,
+    // Validation Enforcement: Editing
+    onEditingRowSave: async (props) => {
+      if (await trigger()) tableOptions.onEditingRowSave?.(props);
+    },
+    // Validation Enforcement: Creating
+    onCreatingRowSave: async (props) => {
+      if (await trigger()) tableOptions.onCreatingRowSave?.(props);
+    },
+    // Close and clear editing row
+    onEditingRowCancel: (props) => {
+      editingRow.current = null;
+    }
+  }), [tableOptions]);
 
-  // Validation Enforcement: Editing
-  tableOptions.onEditingRowSave = async (props)=> {
-    if (await trigger()) tableOptions.onEditingRowSave?.(props);
-  }
-
-  // Validation Enforcement: Creating
-  tableOptions.onCreatingRowSave = async (props)=> {
-    if (await trigger()) tableOptions.onCreatingRowSave?.(props);
-  }
-
-  // Close and clear editing row values
-  tableOptions.onEditingRowCancel = (props) => {
-    setEditingRow(null);
-    reset();
-  }
-
-  return useMaterialReactTable(tableOptions);
+  return useMaterialReactTable(memoizedOptions);
 }

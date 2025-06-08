@@ -16,9 +16,9 @@ import {
  * @param cell - The cell being edited
  * @param newValue - The new value to set (can be any type, including Dayjs objects)
  */
-export const updateEditingRow = <TData extends MRT_RowData>(
+export const updateEditingRow = <TData extends MRT_RowData, TValue = unknown>(
   table: MRT_TableInstance<TData>,
-  cell: MRT_Cell<TData>,
+  cell: MRT_Cell<TData, TValue>,
   newValue: unknown
 ) => {
   const {editingRow, creatingRow} = table.getState();

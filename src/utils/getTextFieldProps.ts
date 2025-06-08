@@ -1,16 +1,7 @@
-import {parseFromValuesOrFunc} from "material-react-table/src/utils/utils";
-import {MRT_Cell, MRT_RowData, MRT_TableInstance} from "material-react-table";
+import {MRT_RowData} from "material-react-table";
 import {TextFieldProps} from "@mui/material";
-
-/**
- * Parameters for the getTextFieldProps function
- *
- * @template T - The data type for the table row
- */
-interface GetMRT_TextFieldProps<T extends MRT_RowData> {
-  cell: MRT_Cell<T>;
-  table: MRT_TableInstance<T>;
-}
+import {EditFunctionProps} from "../types";
+import {parseFromValuesOrFunc} from "./parseFromValuesOrFunc";
 
 /**
  * Gets consistent TextField props for editing components
@@ -25,13 +16,14 @@ interface GetMRT_TextFieldProps<T extends MRT_RowData> {
 export const getTextFieldProps = <T extends MRT_RowData>(
   {
     cell,
-    table
-  }: GetMRT_TextFieldProps<T>): TextFieldProps => {
-  const {column, row} = cell;
+    table,
+    column,
+    row
+  }: EditFunctionProps<T>): TextFieldProps => {
   const {columnDef} = column;
 
   return {
-    variant: 'standard', //can override with columnDef.muiEditTextFieldProps: { variant: "outlined" },
+    variant: 'standard', //suggested override with columnDef.muiEditTextFieldProps: { variant: "outlined" },
     ...parseFromValuesOrFunc(table.options.muiEditTextFieldProps, {cell, column, row, table}),
     ...parseFromValuesOrFunc(columnDef.muiEditTextFieldProps, {cell, column, row, table})
   };

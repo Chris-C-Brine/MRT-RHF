@@ -1,18 +1,26 @@
-import {useEffect, createContext, useContext,  useState, type PropsWithChildren} from "react";
+import {useEffect, createContext, useContext, useState, type PropsWithChildren, useRef, RefObject} from "react";
 import {useForm, type FieldValues,  FormContainer} from "react-hook-form-mui";
 import {MRT_Row} from "material-react-table";
 import {DefaultValues} from "react-hook-form";
 
+/**
+ * The value provided by FormTableContext
+ * @template T - The row data type that extends FieldValues
+ */
 export interface FormTableContextValue<T extends FieldValues = FieldValues> {
-  editingRow: MRT_Row<T> | null;
-  setEditingRow: (row: MRT_Row<T> | null) => void;
+  editingRow: RefObject<MRT_Row<T> | null>;
+  creatingRow: RefObject<boolean>;
 }
 
 const FormTableContext = createContext<FormTableContextValue<any> | undefined>(undefined);
 
 /**
- * Access the typed table form context.
- * Usage: const { editingRow, setEditingRow, form } = useFormTableContext<YourDataType>();
+ * Hook to access the form table context.
+ * @template T - The row data type that extends FieldValues
+ * @returns The form table context value
+ *
+ * @example
+ * const { editingRow, creatingRow } = useFormTableContext<T>();
  */
 export function useFormTableContext<T extends FieldValues>() {
   const ctx = useContext(FormTableContext);
@@ -23,29 +31,26 @@ export function useFormTableContext<T extends FieldValues>() {
 }
 
 /**
- * Provider with generic parameter for strong typing.
- * Place <FormTableProvider<YourRowType>><YourTable /></FormTableProvider> at a high level.
+ * Provider component that creates a context for form-enabled tables.
+ * @template T - The row data type that extends FieldValues
+ *
+ * @example
+ * <FormTableProvider>
+ *   <YourMaterialReactTable />
+ * </FormTableProvider>
  */
 export function FormTableProvider<T extends FieldValues>({children}: PropsWithChildren) {
-  const [editingRow, setEditingRow] = useState<MRT_Row<T> | null>(null);
+  // const [editingRow, setEditingRow] = useState<MRT_Row<T> | null>(null);
+  const editingRow = useRef<MRT_Row<T> | null>(null);
+  const creatingRow = useRef<boolean>(false);
 
   const formContext = useForm<T>({
-    defaultValues: editingRow?.original as DefaultValues<T>,
+    defaultValues: editingRow.current?.original as DefaultValues<T>,
   });
-  const {reset} = formContext;
-
-  // When editingRow changes, reset the form default values
-  useEffect(() => {
-    if (editingRow?.original) {
-      reset(editingRow.original);
-    } else {
-      reset();
-    }
-  }, [editingRow?.original, reset]);
 
   return (
     <FormContainer formContext={formContext}>
-      <FormTableContext.Provider value={{editingRow, setEditingRow}}>
+      <FormTableContext.Provider value={{editingRow, creatingRow}}>
         {children}
       </FormTableContext.Provider>
     </FormContainer>

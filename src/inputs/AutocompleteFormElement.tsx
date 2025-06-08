@@ -6,7 +6,7 @@ import {getTextFieldProps} from "../utils/getTextFieldProps";
 import type {EditFunctionProps} from "../types";
 import {ChipTypeMap, TextFieldProps} from "@mui/material";
 import {FieldPath, FieldValues} from "react-hook-form";
-import {ElementType} from "react";
+import {memo, type ElementType} from "react";
 
 type AutoDefault = {
   id: string | number;
@@ -26,19 +26,18 @@ export type AutocompleteFormElementProps<
   Omit<AutocompleteElementProps<TFieldValues, TName, TValue, Multiple, DisableClearable, FreeSolo, ChipComponent>, 'name' | 'control' | 'textFieldProps'>
   & EditFunctionProps<TData>;
 
-export const AutocompleteFormElement = <T extends MRT_RowData>(
+export const AutocompleteFormElement = memo(<T extends MRT_RowData>(
   {
     cell,
     column,
     table,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     row,
     ...autocompleteProps
   }: AutocompleteFormElementProps<T>) => {
   const {columnDef} = column;
   // Transfer the text field props without overwriting the core component
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const {component, required, ...textFieldProps}: TextFieldProps = getTextFieldProps({cell, table});
+  const {component, required, ...textFieldProps}: TextFieldProps = getTextFieldProps({cell, table, row, column});
 
   return <AutocompleteElement
     name={column.id}
@@ -54,4 +53,6 @@ export const AutocompleteFormElement = <T extends MRT_RowData>(
     {...autocompleteProps}
     required={required || autocompleteProps?.required}
   />;
-}
+});
+
+AutocompleteFormElement.displayName = 'AutocompleteFormElement';
