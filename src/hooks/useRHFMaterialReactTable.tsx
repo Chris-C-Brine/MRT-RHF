@@ -18,7 +18,7 @@ import {useCallback, useMemo} from "react";
  */
 export const useRHFMaterialReactTable = <T extends MRT_RowData>(tableOptions: MRT_TableOptions<T>): MRT_TableInstance<T> => {
   const {trigger} = useFormContext<T>();
-  const {editingRow} = useFormTableContext<T>();
+  const {editingRow, creatingRow} = useFormTableContext<T>();
 
   const memoizedOptions = useMemo<MRT_TableOptions<T>>(() => ({
     ...tableOptions,
@@ -34,12 +34,22 @@ export const useRHFMaterialReactTable = <T extends MRT_RowData>(tableOptions: MR
       }
     },
     // Validation Enforcement: Creating
-    onCreatingRowSave: async (props) => {
-      if (await trigger()) tableOptions.onCreatingRowSave?.(props);
+    onCreatingRowSave: async ({exitCreatingMode, ...props}) => {
+      // Clear creatingRow when the dialog closes
+      //    Note: Button loading/disabled state should come from the creating query
+      const exit = useCallback(() => {
+        creatingRow.current = false;
+        exitCreatingMode();
+      }, [exitCreatingMode]);
+
+      if (await trigger()) tableOptions.onCreatingRowSave?.({...props, exitCreatingMode: exit});
     },
     // Close and clear editing row
     onEditingRowCancel: (props) => {
       editingRow.current = null;
+    },
+    onCreatingRowCancel: (props) => {
+      creatingRow.current = false;
     }
   }), [tableOptions]);
 
