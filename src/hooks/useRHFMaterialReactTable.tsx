@@ -20,14 +20,25 @@ export const useRHFMaterialReactTable = <T extends MRT_RowData>(tableOptions: MR
   const {trigger} = useFormContext<T>();
   const {editingRow, creatingRow} = useFormTableContext<T>();
 
+  const createExitEditingCallback = useCallback((exitEditingMode: () => void) => {
+    return () => {
+      editingRow.current = null;
+      exitEditingMode();
+    };
+  }, [editingRow]);
+
+  const createExitCreatingCallback = useCallback((exitCreatingMode: () => void) => {
+    return () => {
+      creatingRow.current = false;
+      exitCreatingMode();
+    };
+  }, [creatingRow]);
+
   const memoizedOptions = useMemo<MRT_TableOptions<T>>(() => ({
     ...tableOptions,
     // Validation Enforcement: Editing
     onEditingRowSave: async ({exitEditingMode, ...props}) => {
-      const exit = useCallback(() => {
-        editingRow.current = null;
-        exitEditingMode();
-      }, [exitEditingMode]);
+      const exit = createExitEditingCallback(exitEditingMode);
 
       if (await trigger()) {
         tableOptions.onEditingRowSave?.({...props, exitEditingMode: exit});
@@ -35,23 +46,21 @@ export const useRHFMaterialReactTable = <T extends MRT_RowData>(tableOptions: MR
     },
     // Validation Enforcement: Creating
     onCreatingRowSave: async ({exitCreatingMode, ...props}) => {
-      // Clear creatingRow when the dialog closes
-      //    Note: Button loading/disabled state should come from the creating query
-      const exit = useCallback(() => {
-        creatingRow.current = false;
-        exitCreatingMode();
-      }, [exitCreatingMode]);
+      const exit = createExitCreatingCallback(exitCreatingMode);
 
       if (await trigger()) tableOptions.onCreatingRowSave?.({...props, exitCreatingMode: exit});
     },
     // Close and clear editing row
     onEditingRowCancel: (props) => {
       editingRow.current = null;
+      tableOptions.onEditingRowCancel?.(props);
     },
+    // Close and clear editing row
     onCreatingRowCancel: (props) => {
       creatingRow.current = false;
-    }
-  }), [tableOptions]);
+      tableOptions.onCreatingRowCancel?.(props);
+    },
+  }), [tableOptions, createExitEditingCallback, createExitCreatingCallback]);
 
   return useMaterialReactTable(memoizedOptions);
 }

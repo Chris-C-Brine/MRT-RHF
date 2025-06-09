@@ -85,7 +85,7 @@ export const useSetCreatingRow = <TData extends MRT_RowData>() => {
     // Set the creating row state in the table
     table.setCreatingRow(true);
 
-    // Immediately reset with provided values, or wait for the effect if needed
+    // Immediately reset with provided values or wait for the effect if needed
     if (emptyRowValues) {
       reset(emptyRowValues);
     } else {

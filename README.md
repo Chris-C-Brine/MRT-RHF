@@ -58,12 +58,14 @@ const InnerDemoTable = memo(() => {
               <VisibilityIcon />
             </IconButton>
             <IconButton
-              disabled={editingRow?.current?.id} 
-              loading={editingRow?.current?.id == row.id}  
+              // Disable when a row is updating on a single mutation instance
+              disabled={!!editingRow?.current?.id} // mutation.isFetching
+              loading={editingRow?.current?.id == row.id} // mutation?.variables?.id == row.id
               onClick={() => setEditingRow({ table, row })}
             >
               <EditIcon />
             </IconButton>
+            {/* Delete Button / Confirmation Dialog */}
           </>
         );
       },
