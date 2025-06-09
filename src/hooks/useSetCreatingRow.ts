@@ -7,9 +7,12 @@ import {useMemo, useRef, useEffect} from "react";
  * @template TData - The row data type that extends MRT_RowData
  */
 type useSetCreatingRowProps<TData extends MRT_RowData> = {
+  /** The Material React Table instance */
   table: MRT_TableInstance<TData>;
+  /** Optional initial values for the new row */
   emptyRowValues?: FieldValues;
 }
+
 
 /**
  * Hook to set the table in creating row mode.

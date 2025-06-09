@@ -23,11 +23,11 @@ const FormTableContext = createContext<FormTableContextValue<any> | undefined>(u
  * const { editingRow, creatingRow } = useFormTableContext<T>();
  */
 export function useFormTableContext<T extends FieldValues>() {
-  const ctx = useContext(FormTableContext);
-  if (!ctx) {
+  const contextValue = useContext(FormTableContext);
+  if (!contextValue) {
     throw new Error('useFormTableContext must be used within a FormTableProvider');
   }
-  return ctx as FormTableContextValue<T>;
+  return contextValue as FormTableContextValue<T>;
 }
 
 /**
@@ -38,9 +38,11 @@ export function useFormTableContext<T extends FieldValues>() {
  * <FormTableProvider>
  *   <YourMaterialReactTable />
  * </FormTableProvider>
+ *
+ * @param props - The component props
+ * @param props.children - The child components that will have access to the form table context
  */
 export function FormTableProvider<T extends FieldValues>({children}: PropsWithChildren) {
-  // const [editingRow, setEditingRow] = useState<MRT_Row<T> | null>(null);
   const editingRow = useRef<MRT_Row<T> | null>(null);
   const creatingRow = useRef<boolean>(false);
 

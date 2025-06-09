@@ -1,4 +1,4 @@
-import {MRT_RowData} from "material-react-table";
+import {MRT_Cell, MRT_Column, MRT_RowData} from "material-react-table";
 import {TextFieldProps} from "@mui/material";
 import {EditFunctionProps} from "../types";
 import {parseFromValuesOrFunc} from "./parseFromValuesOrFunc";
@@ -13,18 +13,26 @@ import {parseFromValuesOrFunc} from "./parseFromValuesOrFunc";
  * @param options - Object containing cell and table
  * @returns TextFieldProps - The combined TextField props
  */
-export const getTextFieldProps = <T extends MRT_RowData>(
+export const getTextFieldProps = <TData extends MRT_RowData, TValue = unknown>(
   {
     cell,
     table,
     column,
     row
-  }: EditFunctionProps<T>): TextFieldProps => {
-  const {columnDef} = column;
+  }: EditFunctionProps<TData, TValue>): TextFieldProps => {
+  // Create a type-compatible object for parseFromValuesOrFunc
+  const props = {
+    cell: cell as MRT_Cell<TData, unknown>,
+    column: column as MRT_Column<TData, unknown>,
+    row,
+    table
+  };
+
+  const {columnDef} = props.column;
 
   return {
     variant: 'standard', //suggested override with columnDef.muiEditTextFieldProps: { variant: "outlined" },
-    ...parseFromValuesOrFunc(table.options.muiEditTextFieldProps, {cell, column, row, table}),
-    ...parseFromValuesOrFunc(columnDef.muiEditTextFieldProps, {cell, column, row, table})
+    ...parseFromValuesOrFunc(table.options.muiEditTextFieldProps, props),
+    ...parseFromValuesOrFunc(columnDef.muiEditTextFieldProps, props)
   };
 }
