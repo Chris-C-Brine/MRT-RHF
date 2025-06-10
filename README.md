@@ -22,6 +22,7 @@ This library (`@chris-c-brine/mrt-rhf`) simplifies the integration between:
 ## Example
 
 ```tsx
+// src/pages/DemoPage/components/DemoTable.tsx
 import { MRT_EditDialog, setViewingRow } from "@chris-c-brine/mrt-ui-kit";
 import { MaterialReactTable, type MRT_TableOptions } from "material-react-table";
 import { memo, useMemo } from "react";
@@ -40,10 +41,12 @@ import {
   Add as AddIcon,
 } from "@mui/icons-material";
 import  aboutTableData from "./aboutTableData";
-import aboutTableColumns from "./aboutTableColumns";
+import getDemoTableColumns from "./getDemoTableColumns";
+
 
 const InnerDemoTable = memo(() => {
   const { setEditingRow, setCreatingRow } = useFormSetActions<UserType>();
+  const aboutTableColumns = getDemoTableColumns();
 
   const tableConfig = useMemo<MRT_TableOptions<UserType>>(
     () => ({
@@ -114,7 +117,7 @@ const InnerDemoTable = memo(() => {
       ),
       // ... Other configs
     }),
-    [setCreatingRow, setEditingRow/*, ...other config dependencies */],
+    [setCreatingRow, setEditingRow, aboutTableColumns, /*, ...other config dependencies */],
   );
 
   const table = useRHFMaterialReactTable(tableConfig);
@@ -128,6 +131,136 @@ const DemoTable = () => (
 )
 
 export default DemoTable;
+```
+```tsx
+// src/pages/DemoPage/components/getAboutTableColumns.tsx
+import { birthdayCheck, calculateAge } from "@utils";
+import dayjs from "dayjs";
+import type { MRT_ColumnDef } from "material-react-table";
+import { hobbies, hobbyObjects, HobbyObjectType } from "./hobbies";
+import { MRT_EditCellDatePicker } from "@chris-c-brine/mrt-ui-kit";
+import { MuiIcon } from "@src/components";
+import type { UserType } from "../aboutTypes";
+import { Chip } from "@mui/material";
+import { AutocompleteFormElement,TextFormElement, type EditFunctionProps  } from "@chris-c-brine/mrt-rhf";
+
+const getDemoTableColumns = (): MRT_ColumnDef<UserType>[] => [
+  {
+    columnDefType: "display", // Hide from Edit/Create/View Dialogs
+    header: "ID",
+    accessorKey: "id",
+
+    // Note: The option will still appear in the column visibility toggle menu
+    enableHiding: false, // Don't allow it's hiding state to be altered
+
+    // Hide from the column visibility toggle menu
+    visibleInShowHideMenu: false
+  },
+  {
+    header: "Name",
+    accessorKey: "name",
+    enableGrouping: false,
+    enableClickToCopy: true,
+    Edit: TextFormElement,
+    muiEditTextFieldProps: {
+      size: "medium",
+      variant: "standard",
+      required: true,
+      fullWidth: true,
+      slotProps: {
+        inputLabel: { shrink: true }
+      }
+    }
+  },
+  {
+    header: "DOB",
+    accessorKey: "dob",
+    Cell: ({ cell }: EditFunctionProps<UserType>) => {
+      const dob = cell.getValue<string>();
+      return (
+        <>
+          {dayjs(dob).format("MM/DD/YYYY")}
+          {birthdayCheck(dob) && <MuiIcon sx={{ ml: 2 }} muiName="CakeIcon" />}
+        </>
+      );
+    },
+    enableEditing: false,
+
+    Edit: ({ table, cell }: EditFunctionProps<UserType>) => {
+      return <MRT_EditCellDatePicker table={table} cell={cell} showLabel />;
+    }
+  },
+  {
+    header: "Hobbies",
+    accessorKey: "hobbies",
+    filterVariant: "select",
+    filterSelectOptions: hobbies,
+    Cell: ({ cell }) => {
+      const cValue = cell.getValue<string[] | string>();
+      if (Array.isArray(cValue)) return cValue?.map((i: string) => <Chip label={i} key={i} />);
+      return cValue;
+    },
+    Edit: (props: EditFunctionProps<UserType>) => (
+      <AutocompleteFormElement
+        {...props}
+        options={hobbies}
+        multiple={true}
+        autocompleteProps={{
+          slotProps: {
+            chip: { size: "small" } // Conforms to medium height input
+          }
+        }}
+      />
+    )
+  },
+  {
+    header: "Hobby Object",
+    accessorKey: "hobbyObject",
+    filterVariant: "select",
+    filterSelectOptions: hobbyObjects.map((i) => i.name),
+    filterFn: (row, id, filterValue) => row.getValue<HobbyObjectType>(id).name == filterValue,
+    Cell: ({ cell }) => cell.getValue<HobbyObjectType>()?.name,
+    Edit: (props: EditFunctionProps<UserType>) => (
+      <AutocompleteFormElement
+        {...props as EditFunctionProps<UserType, HobbyObjectType>}
+        options={hobbyObjects}
+        autocompleteProps={{
+          getOptionLabel: (i) => i.name,
+          getOptionKey: (i) => i.id,
+          slotProps: {
+            chip: { size: "small" } // Conforms to medium height input
+          }
+        }}
+      />
+    )
+  },
+  {
+    header: "Age",
+    id: "age",
+    accessorFn: ({ dob }) => {
+      const { years, months, days } = calculateAge(dob);
+      return `${years} years, ${months} months, and ${days} days old`;
+    },
+    enableGrouping: false,
+    enableEditing: false,
+    Edit: () => null
+  }
+];
+
+export default getDemoTableColumns;
+```
+```ts
+// src/pages/DemoPage/components/hobbies.ts
+export const hobbies = ['Coding', 'Music', 'Reading', 'Learning'];
+
+export const hobbyObjects = [
+  {name: "Coding", id: 1 },
+  {name: "Music", id: 2 },
+  {name: "Reading", id: 3 },
+  {name: "Learning", id: 4 }
+];
+export type HobbyObjectType = (typeof hobbyObjects)[number];
+export type HobbyType = (typeof hobbies)[number];
 ```
 
 ## License

@@ -9,3 +9,4 @@ export * from "./hooks/useRHFMaterialReactTable";
 export * from "./utils/getTextFieldProps";
 export * from "./utils/parseFromValuesOrFunc";
 export * from "./utils/updateEditingRow";
+export * from "./types"

@@ -9,6 +9,21 @@ import type {MRT_Cell, MRT_Column, MRT_Row, MRT_RowData, MRT_TableInstance} from
  *
  * @template TData - The data type for the table row
  * @template TValue - The value type for the cell (defaults to unknown)
+ *
+ * @example
+ * ```tsx
+ *  Edit: (props: EditFunctionProps<UserType>) => (<AutocompleteFormElement
+ *    {...props as EditFunctionProps<UserType, HobbyObjectType>}
+ *    options={hobbyObjects}
+ *    autocompleteProps={{
+ *      getOptionLabel: (i) => i.name,
+ *      getOptionKey: (i) => i.id,
+ *      slotProps: {
+ *        chip: { size: "small" } // Conforms to medium height input
+ *      }
+ *    }}
+ *  />),
+ * ```
  */
 export type EditFunctionProps<TData extends MRT_RowData, TValue = unknown> = {
   /** The cell being edited */
