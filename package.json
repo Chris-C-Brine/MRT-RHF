@@ -1,6 +1,6 @@
 {
   "name": "@chris-c-brine/mrt-rhf",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Material React Table with React Hook Form Mui",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -16,8 +16,8 @@ This package requires the following peer dependencies:
 
 ## Project Purpose
 This library (`@chris-c-brine/mrt-rhf`) simplifies the integration between:
-- **Material React Table** - A feature-rich table library built on MUI v5
-- **React Hook Form** - A performant, flexible form validation library
+- **Material React Table** \- A feature-rich table library built on MUI v5
+- **React Hook Form** \- A performant, flexible form validation library
 
 ## Example
 
@@ -137,12 +137,12 @@ export default DemoTable;
 import { birthdayCheck, calculateAge } from "@utils";
 import dayjs from "dayjs";
 import type { MRT_ColumnDef } from "material-react-table";
-import { hobbies, hobbyObjects, HobbyObjectType } from "./hobbies";
+import { hobbies, hobbyObjects, HobbyType } from "./hobbies";
 import { MRT_EditCellDatePicker } from "@chris-c-brine/mrt-ui-kit";
 import { MuiIcon } from "@src/components";
 import type { UserType } from "../aboutTypes";
 import { Chip } from "@mui/material";
-import { AutocompleteFormElement,TextFormElement, type EditFunctionProps  } from "@chris-c-brine/mrt-rhf";
+import {AutocompleteFormElement, TextFormElement, type EditFunctionProps} from "@chris-c-brine/mrt-rhf";
 
 const getDemoTableColumns = (): MRT_ColumnDef<UserType>[] => [
   {
@@ -154,7 +154,7 @@ const getDemoTableColumns = (): MRT_ColumnDef<UserType>[] => [
     enableHiding: false, // Don't allow it's hiding state to be altered
 
     // Hide from the column visibility toggle menu
-    visibleInShowHideMenu: false
+    visibleInShowHideMenu: false,
   },
   {
     header: "Name",
@@ -168,9 +168,9 @@ const getDemoTableColumns = (): MRT_ColumnDef<UserType>[] => [
       required: true,
       fullWidth: true,
       slotProps: {
-        inputLabel: { shrink: true }
-      }
-    }
+        inputLabel: { shrink: true },
+      },
+    },
   },
   {
     header: "DOB",
@@ -188,13 +188,13 @@ const getDemoTableColumns = (): MRT_ColumnDef<UserType>[] => [
 
     Edit: ({ table, cell }: EditFunctionProps<UserType>) => {
       return <MRT_EditCellDatePicker table={table} cell={cell} showLabel />;
-    }
+    },
   },
   {
     header: "Hobbies",
     accessorKey: "hobbies",
     filterVariant: "select",
-    filterSelectOptions: hobbies,
+    filterSelectOptions: [...hobbies],
     Cell: ({ cell }) => {
       const cValue = cell.getValue<string[] | string>();
       if (Array.isArray(cValue)) return cValue?.map((i: string) => <Chip label={i} key={i} />);
@@ -203,36 +203,43 @@ const getDemoTableColumns = (): MRT_ColumnDef<UserType>[] => [
     Edit: (props: EditFunctionProps<UserType>) => (
       <AutocompleteFormElement
         {...props}
-        options={hobbies}
+        options={[...hobbies]}
         multiple={true}
         autocompleteProps={{
           slotProps: {
-            chip: { size: "small" } // Conforms to medium height input
-          }
+            chip: { size: "small" }, // Conforms to medium height input
+          },
         }}
       />
-    )
+    ),
   },
   {
     header: "Hobby Object",
-    accessorKey: "hobbyObject",
+    accessorKey: "hobbyId",
     filterVariant: "select",
     filterSelectOptions: hobbyObjects.map((i) => i.name),
-    filterFn: (row, id, filterValue) => row.getValue<HobbyObjectType>(id).name == filterValue,
-    Cell: ({ cell }) => cell.getValue<HobbyObjectType>()?.name,
+    filterFn: (row, id, filterValue) => row.getValue<HobbyType>(id).name == filterValue,
+    Cell: ({ cell }) => {
+      const id = cell.getValue<number>();
+      return hobbyObjects.find((i) => i.id == id)?.name;
+    },
     Edit: (props: EditFunctionProps<UserType>) => (
       <AutocompleteFormElement
-        {...props as EditFunctionProps<UserType, HobbyObjectType>}
+        {...props as EditFunctionProps<UserType, number>}
         options={hobbyObjects}
         autocompleteProps={{
-          getOptionLabel: (i) => i.name,
-          getOptionKey: (i) => i.id,
+          getOptionLabel: (i) =>
+            typeof i == "number" ? (hobbyObjects.find((h) => h.id == i)?.name ?? "") : i.name,
+          getOptionKey: (i) => (typeof i == "number" ? i : i.id),
           slotProps: {
-            chip: { size: "small" } // Conforms to medium height input
-          }
+            chip: { size: "small" }, // Conforms to medium height input
+          },
+        }}
+        transform={{
+          output: (_, i) => i.id,
         }}
       />
-    )
+    ),
   },
   {
     header: "Age",
@@ -243,26 +250,24 @@ const getDemoTableColumns = (): MRT_ColumnDef<UserType>[] => [
     },
     enableGrouping: false,
     enableEditing: false,
-    Edit: () => null
-  }
+    Edit: () => null,
+  },
 ];
 
 export default getDemoTableColumns;
 ```
 ```ts
 // src/pages/DemoPage/components/hobbies.ts
-export const hobbies = ['Coding', 'Music', 'Reading', 'Learning'];
+export const hobbies = ['Coding', 'Music', 'Reading', 'Learning'] as const;
+export type HobbyType = {
+  id: number;
+  name: typeof hobbies[number];
+}
 
-export const hobbyObjects = [
-  {name: "Coding", id: 1 },
-  {name: "Music", id: 2 },
-  {name: "Reading", id: 3 },
-  {name: "Learning", id: 4 }
-];
-export type HobbyObjectType = (typeof hobbyObjects)[number];
-export type HobbyType = (typeof hobbies)[number];
+export const hobbyObjects = hobbies.map<HobbyType>((i, k) => ({ id: k + 1, name: i }));
 ```
 
 ## License
+
 
 [AAL](LICENSE) © Christopher C. Brine

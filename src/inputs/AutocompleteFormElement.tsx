@@ -4,54 +4,14 @@ import {updateEditingRow} from "../utils/updateEditingRow";
 import {getTextFieldProps} from "../utils/getTextFieldProps";
 import {
   AutocompleteChangeDetails,
-  AutocompleteChangeReason,
-  AutocompleteProps as BaseProps,
+  AutocompleteChangeReason, AutocompleteFreeSoloValueMapping, AutocompleteProps,
   AutocompleteValue,
-  ChipTypeMap,
   TextFieldProps
 } from "@mui/material";
-import {ElementType, ReactNode, SyntheticEvent} from "react";
+import { SyntheticEvent} from "react";
 import {EditFunctionProps} from "../types";
 import * as React from "react";
 
-/**
- * Extended AutocompleteProps type that includes our custom properties
- */
-export type AutocompleteProps<
-  TValue,
-  Multiple extends boolean | undefined = false,
-  DisableClearable extends boolean | undefined = false,
-  FreeSolo extends boolean | undefined = false,
-  ChipComponent extends React.ElementType = ChipTypeMap['defaultComponent']
-> = Omit<BaseProps<TValue, Multiple, DisableClearable, FreeSolo, ChipComponent>, 'name' | 'options' | 'loading' | 'renderInput'>
-
-
-/**
- * Props for the AutocompleteFormElement component
- *
- * @template TData - The data type for the table row
- * @template TValue - The value type for the autocomplete field
- * @template Multiple - Whether multiple selections are allowed
- * @template DisableClearable - Whether clearing the field is disabled
- * @template FreeSolo - Whether free text input is allowed
- */
-export type AutocompleteFormElementProps<
-  TData extends MRT_RowData,
-  TValue = unknown,
-  Multiple extends boolean | undefined = false,
-  DisableClearable extends boolean | undefined = false,
-  FreeSolo extends boolean | undefined = false,
-  ChipComponent extends ElementType = ChipTypeMap['defaultComponent']
-> =
-  EditFunctionProps<TData, TValue>
-  & Pick<AutocompleteElementProps<TValue, Multiple, DisableClearable, FreeSolo, ChipComponent>, 'options' | 'multiple' | 'loading' | 'required' | 'rules' | 'showCheckbox' | 'loadingIndicator'>
-  & {
-    autocompleteProps?: AutocompleteProps<TValue, Multiple, DisableClearable, FreeSolo, ChipComponent>,
-    transform?: {
-      input?: (value: TValue) => AutocompleteValue<TValue, Multiple, DisableClearable, FreeSolo>;
-      output?: (event: SyntheticEvent, value: AutocompleteValue<TValue, Multiple, DisableClearable, FreeSolo>, reason: AutocompleteChangeReason, details?: AutocompleteChangeDetails<TValue>) => TValue;
-    }
-};
 
 /**
  * A form element that renders an Autocomplete field for Material React Table editing
@@ -62,6 +22,7 @@ export type AutocompleteFormElementProps<
  *
  * @template TData - The data type for the table row
  * @template TValue - The value type for the autocomplete field
+ * @template TOption - The type of options in the options array
  * @template Multiple - Whether multiple selections are allowed
  * @template DisableClearable - Whether clearing the field is disabled
  * @template FreeSolo - Whether free text input is allowed
@@ -87,13 +48,25 @@ export type AutocompleteFormElementProps<
  */
 export function AutocompleteFormElement<
   TData extends MRT_RowData,
-  TValue,
+  TValue = undefined,
+  TOption = undefined,
   Multiple extends boolean | undefined = false,
   DisableClearable extends boolean | undefined = false,
   FreeSolo extends boolean | undefined = false
 >(
-  props: AutocompleteFormElementProps<TData, TValue, Multiple, DisableClearable, FreeSolo>
-): ReactNode {
+  props: EditFunctionProps<TData, TValue> &
+    Pick<AutocompleteElementProps<TValue, Multiple, DisableClearable, FreeSolo>, 'multiple' | 'loading' | 'required' | 'rules' | 'showCheckbox' | 'loadingIndicator'> & {
+    options:TOption[];
+    autocompleteProps?: Omit<AutocompleteProps<TValue, Multiple, DisableClearable, FreeSolo>, 'name' | 'options' | 'loading' | 'renderInput' | 'getOptionKey' | 'getOptionLabel'> & {
+      getOptionKey?: (option: TOption | TValue  | AutocompleteFreeSoloValueMapping<FreeSolo>) => string | number;
+      getOptionLabel?: (option: TOption | TValue | AutocompleteFreeSoloValueMapping<FreeSolo>) => string;
+    };
+    transform?: {
+      input?: (value: TOption) => AutocompleteValue<TValue, Multiple, DisableClearable, FreeSolo>;
+      output?: (event: SyntheticEvent, value: TOption, reason: AutocompleteChangeReason, details?: AutocompleteChangeDetails<TValue>) => TValue;
+    }
+  }
+) {
   const {
     cell,
     table,
@@ -124,40 +97,37 @@ export function AutocompleteFormElement<
   return (
     <AutocompleteElement
       name={fieldName}
-      options={options}
+      options={options as any as TValue[]}
       multiple={multiple}
       label={columnDef.header}
       textFieldProps={textFieldProps}
       required={required || aRequired}
-      autocompleteProps={{
-        ...autocompleteProps,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        onChange: (event, newValue, reason, details) => {
-          autocompleteProps?.onChange?.(event, newValue, reason, details);
-          updateEditingRow(table, cell, newValue)
-        }
-      }}
+      autocompleteProps={autocompleteProps}
       transform={{
-        input: (value: TValue): AutocompleteValue<TValue, Multiple, DisableClearable, FreeSolo> => {
+        input: (value: TOption): AutocompleteValue<TValue, Multiple, DisableClearable, FreeSolo> => {
           // Use custom transform if provided, otherwise return value as is
           if (customTransform?.input) return customTransform.input(value);
           return value as AutocompleteValue<TValue, Multiple, DisableClearable, FreeSolo>;
         },
         output: (
           event: SyntheticEvent,
-          value: AutocompleteValue<TValue, Multiple, DisableClearable, FreeSolo>,
+          value: AutocompleteValue<TValue | TOption, Multiple, DisableClearable, FreeSolo>,
           reason: AutocompleteChangeReason,
           details?: AutocompleteChangeDetails<TValue>
         ): TValue => {
+          let newValue = value as TValue;
+
           // Use custom transform if provided
-          if (customTransform?.output) return customTransform.output(event, value, reason, details);
+          if (customTransform?.output) newValue = customTransform.output(event, value as TOption, reason, details);
 
           // Default transform logic
           if (multiple && Array.isArray(value))
-            return (value.map((i) => i as TValue)) as TValue;
+            newValue = (value.map((i) => i as TValue)) as TValue;
+
+          updateEditingRow(table, cell, newValue);
 
           // For single selection, return the value as TValue
-          return value as TValue;
+          return newValue;
         }
       }}
       {...rest}
