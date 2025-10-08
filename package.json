@@ -1,6 +1,6 @@
 {
   "name": "@chris-c-brine/mrt-rhf",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Material React Table with React Hook Form Mui",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,7 +27,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.56.2",
-    "react-hook-form-mui": "^7.6.1"
+    "react-hook-form-mui": "^7.6.1 || ^8.0.0"
   },
   "devDependencies": {
     "@emotion/react": "^11.14.0",
