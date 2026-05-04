@@ -62,7 +62,7 @@ export function AutocompleteFormElement<
       getOptionLabel?: (option: TOption | TValue | AutocompleteFreeSoloValueMapping<FreeSolo>) => string;
     };
     transform?: {
-      input?: (value: TOption) => AutocompleteValue<TValue, Multiple, DisableClearable, FreeSolo>;
+      input?: (value: TOption | TValue) => AutocompleteValue<TValue, Multiple, DisableClearable, FreeSolo>;
       output?: (event: SyntheticEvent, value: TOption, reason: AutocompleteChangeReason, details?: AutocompleteChangeDetails<TValue>) => TValue;
     }
   }
@@ -104,7 +104,7 @@ export function AutocompleteFormElement<
       required={required || aRequired}
       autocompleteProps={autocompleteProps}
       transform={{
-        input: (value: TOption): AutocompleteValue<TValue, Multiple, DisableClearable, FreeSolo> => {
+        input: (value: TOption | TValue): AutocompleteValue<TValue, Multiple, DisableClearable, FreeSolo> => {
           // Use custom transform if provided, otherwise return value as is
           if (customTransform?.input) return customTransform.input(value);
           return value as AutocompleteValue<TValue, Multiple, DisableClearable, FreeSolo>;
