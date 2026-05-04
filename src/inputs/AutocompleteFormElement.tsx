@@ -4,7 +4,8 @@ import {updateEditingRow} from "../utils/updateEditingRow";
 import {getTextFieldProps} from "../utils/getTextFieldProps";
 import {
   AutocompleteChangeDetails,
-  AutocompleteChangeReason, AutocompleteFreeSoloValueMapping, AutocompleteProps,
+  AutocompleteChangeReason,
+  AutocompleteProps,
   AutocompleteValue,
   TextFieldProps
 } from "@mui/material";
@@ -57,10 +58,7 @@ export function AutocompleteFormElement<
   props: EditFunctionProps<TData, TValue> &
     Pick<AutocompleteElementProps<TValue, Multiple, DisableClearable, FreeSolo>, 'multiple' | 'loading' | 'required' | 'rules' | 'showCheckbox' | 'loadingIndicator'> & {
     options:TOption[];
-    autocompleteProps?: Omit<AutocompleteProps<TValue, Multiple, DisableClearable, FreeSolo>, 'name' | 'options' | 'loading' | 'renderInput' | 'getOptionKey' | 'getOptionLabel'> & {
-      getOptionKey?: (option: TOption | TValue  | AutocompleteFreeSoloValueMapping<FreeSolo>) => string | number;
-      getOptionLabel?: (option: TOption | TValue | AutocompleteFreeSoloValueMapping<FreeSolo>) => string;
-    };
+    autocompleteProps?: Omit<AutocompleteProps<TValue, Multiple, DisableClearable, FreeSolo>, 'name' | 'options' | 'loading' | 'renderInput'>;
     transform?: {
       input?: (value: TOption | TValue) => AutocompleteValue<TValue, Multiple, DisableClearable, FreeSolo>;
       output?: (event: SyntheticEvent, value: TOption, reason: AutocompleteChangeReason, details?: AutocompleteChangeDetails<TValue>) => TValue;
