@@ -24,8 +24,10 @@ export default {
         typescript({
             tsconfig: './tsconfig.json',
             declaration: true,
+            declarationMap: true,
             declarationDir: 'dist',
             sourceMap: true,
+            inlineSources: true,
             noEmitOnError: false // Allow build to continue with errors
         })
     ],
