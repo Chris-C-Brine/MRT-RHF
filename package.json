@@ -1,6 +1,6 @@
 {
   "name": "@chris-c-brine/mrt-rhf",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Material React Table with React Hook Form Mui",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,7 +10,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "clean": "node --eval \"import('fs').then(({default:fs})=>{if(fs.existsSync('dist'))fs.rmSync('dist',{recursive:true,force:true})})\"",
+    "clean": "node -e \"require('fs').rmSync('./dist', {recursive: true, force: true})\"",
     "build": "npm run clean && rollup -c",
     "prepare": "npm run build"
   },
